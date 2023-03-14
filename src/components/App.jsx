@@ -16,27 +16,28 @@ class App extends Component {
   };
 
   async componentDidUpdate(prevProps, prevState) {
+    const {
+      request: prevRequest,
+      images: prevImages,
+      page: prevPage,
+    } = prevState;
+    const { request: newRequest, page: newPage } = this.state;
+
     try {
-      if (
-        prevState.request !== this.state.request ||
-        prevState.page !== this.state.page
-      ) {
+      if (prevRequest !== newRequest || prevPage !== newPage) {
         this.setState({ status: 'pending' });
 
-        const result = await requestImages(this.state.request, this.state.page);
-
+        const result = await requestImages(newRequest, newPage);
         const { data: allData } = result;
         const { hits: images } = allData;
 
         if (images.length === 0) {
           this.setState({ status: 'error' });
-          return;
         } else {
           this.setState({
-            images:
-              this.state.page === 1 ? images : [...prevState.images, ...images],
+            images: [...prevImages, ...images],
             status: 'success',
-            showBtn: this.state.page < Math.ceil(allData.totalHits / 12),
+            showBtn: newPage < Math.ceil(allData.totalHits / 12),
           });
         }
       }
@@ -54,7 +55,6 @@ class App extends Component {
       page: 1,
       showBtn: false,
     });
-    console.log(this.state.images);
   };
 
   handleButtonClick = () => {
@@ -84,7 +84,6 @@ class App extends Component {
         </div>
       </>
     );
-    // }
   }
 }
 
